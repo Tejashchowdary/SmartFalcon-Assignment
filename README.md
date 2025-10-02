@@ -40,16 +40,12 @@ Follow the Fabric Getting Started Guide
 curl -sSL https://bit.ly/2ysbOFE | bash -s
 cd fabric-samples
 
-3. Add This Project
-cd fabric-samples
-git clone <your-repo-url> asset-transfer-mywork
-
-4. Start the Test Network
+3. Start the Test Network
 cd test-network
 ./network.sh down
 ./network.sh up createChannel -c mychannel -ca
 
-5. Deploy the Chaincode
+4. Deploy the Chaincode
 ./network.sh deployCC -ccn accountcc -ccp ../asset-transfer-mywork/chaincode-go -ccl go
 
 🔗 Smart Contract (Chaincode)
