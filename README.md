@@ -1,46 +1,60 @@
 Hyperledger Fabric Account Management System
-A blockchain-based account management system built on Hyperledger Fabric, featuring smart contract chaincode and a REST API for managing financial accounts.
-Project Structure
+
+A blockchain-based account management system built on Hyperledger Fabric, featuring:
+
+Smart contract (chaincode) in Go
+
+REST API service for account management
+
+Secure, auditable, and immutable ledger storage
+
+📂 Project Structure
 asset-transfer-mywork/
 ├── chaincode-go/           # Smart contract (chaincode)
 │   ├── account_chaincode.go
 │   ├── go.mod
 │   └── go.sum
-└── go-rest-api/           # REST API service
+└── go-rest-api/            # REST API service
     ├── main.go
     ├── Dockerfile
     ├── go.mod
     └── go.sum
-Prerequisites
 
-Go 1.23 or higher
-Docker and Docker Compose
+✅ Prerequisites
+
+Go 1.23+
+
+Docker & Docker Compose
+
 Hyperledger Fabric 2.5.x
+
 Hyperledger Fabric Samples repository
 
-Setup Instructions
+⚙️ Setup Instructions
 1. Install Hyperledger Fabric
-Follow the official Hyperledger Fabric documentation:
 
-Getting Started
-Install Prerequisites
+Follow the Fabric Getting Started Guide
+.
 
 2. Clone Fabric Samples
-bashcurl -sSL https://bit.ly/2ysbOFE | bash -s
+curl -sSL https://bit.ly/2ysbOFE | bash -s
 cd fabric-samples
+
 3. Add This Project
-Clone this repository into the fabric-samples directory:
-bashcd fabric-samples
+cd fabric-samples
 git clone <your-repo-url> asset-transfer-mywork
+
 4. Start the Test Network
-bashcd test-network
+cd test-network
 ./network.sh down
 ./network.sh up createChannel -c mychannel -ca
+
 5. Deploy the Chaincode
-bash./network.sh deployCC -ccn accountcc -ccp ../asset-transfer-mywork/chaincode-go -ccl go
-Smart Contract (Chaincode) Functions
+./network.sh deployCC -ccn accountcc -ccp ../asset-transfer-mywork/chaincode-go -ccl go
+
+🔗 Smart Contract (Chaincode)
 Account Structure
-gotype Account struct {
+type Account struct {
     DealerID    string  `json:"DEALERID"`
     MSISDN      string  `json:"MSISDN"`
     MPIN        string  `json:"MPIN"`
@@ -50,44 +64,58 @@ gotype Account struct {
     TransType   string  `json:"TRANSTYPE"`
     Remarks     string  `json:"REMARKS"`
 }
-Available Functions
+
+Functions
 
 CreateAccount - Create a new account
+
 ReadAccount - Read account details
+
 UpdateAccount - Update account information
+
 GetAccountHistory - Retrieve transaction history
+
 AccountExists - Check if account exists
 
-REST API
+🌐 REST API
 Build Docker Image
-bashcd asset-transfer-mywork/go-rest-api
+cd asset-transfer-mywork/go-rest-api
 docker build -t asset-rest:latest .
-Run the REST API
-bashdocker run --rm -p 8080:8080 \
+
+Run REST API
+docker run --rm -p 8080:8080 \
   --network fabric_test \
   -v $(pwd)/../../test-network/organizations:/app/organizations:ro \
   asset-rest:latest
-API Endpoints
-1. Create Account
-bashcurl -X POST http://localhost:8080/accounts \
-  -H "Content-Type: application/json" \
-  -d '{
-    "key": "acc001",
-    "DEALERID": "D001",
-    "MSISDN": "9876543210",
-    "MPIN": "1234",
-    "BALANCE": "10000",
-    "STATUS": "ACTIVE",
-    "TRANSAMOUNT": "0",
-    "TRANSTYPE": "INIT",
-    "REMARKS": "Initial account"
-  }'
+
+📡 API Endpoints
+Create Account
+curl -X POST http://localhost:8080/accounts \
+-H "Content-Type: application/json" \
+-d '{
+  "key": "acc001",
+  "DEALERID": "D001",
+  "MSISDN": "9876543210",
+  "MPIN": "1234",
+  "BALANCE": "10000",
+  "STATUS": "ACTIVE",
+  "TRANSAMOUNT": "0",
+  "TRANSTYPE": "INIT",
+  "REMARKS": "Initial account"
+}'
+
+
 Response:
-json{"result":"created","key":"acc001"}
-2. Read Account
-bashcurl http://localhost:8080/accounts/acc001
+
+{"result":"created","key":"acc001"}
+
+Read Account
+curl http://localhost:8080/accounts/acc001
+
+
 Response:
-json{
+
+{
   "DEALERID": "D001",
   "MSISDN": "9876543210",
   "MPIN": "1234",
@@ -97,19 +125,24 @@ json{
   "TRANSTYPE": "INIT",
   "REMARKS": "Initial account"
 }
-3. Update Account
-bashcurl -X PUT http://localhost:8080/accounts/acc001 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "BALANCE": "15000",
-    "REMARKS": "Balance updated"
-  }'
+
+Update Account
+curl -X PUT http://localhost:8080/accounts/acc001 \
+-H "Content-Type: application/json" \
+-d '{ "BALANCE": "15000", "REMARKS": "Balance updated" }'
+
+
 Response:
-json{"result":"updated","key":"acc001"}
-4. Get Account History
-bashcurl http://localhost:8080/accounts/acc001/history
+
+{"result":"updated","key":"acc001"}
+
+Get Account History
+curl http://localhost:8080/accounts/acc001/history
+
+
 Response:
-json[
+
+[
   {
     "IsDelete": false,
     "Timestamp": {"seconds": 1759397987, "nanos": 869326844},
@@ -126,9 +159,11 @@ json[
     }
   }
 ]
-Testing
-Test the Chaincode Directly
-bash# Set environment variables
+
+🧪 Testing Chaincode Directly
+
+Set environment variables:
+
 export PATH=${PWD}/../bin:$PATH
 export FABRIC_CFG_PATH=$PWD/../config/
 export CORE_PEER_TLS_ENABLED=true
@@ -137,75 +172,91 @@ export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org1.e
 export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
 export CORE_PEER_ADDRESS=localhost:7051
 
-# Create an account
+
+Create an account:
+
 peer chaincode invoke -o localhost:7050 \
-  --ordererTLSHostnameOverride orderer.example.com \
-  --tls --cafile ${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
-  -C mychannel -n accountcc \
-  --peerAddresses localhost:7051 --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
-  --peerAddresses localhost:9051 --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
-  -c '{"function":"CreateAccount","Args":["acc001","D001","9876543210","1234","10000","ACTIVE","0","INIT","Initial account"]}'
+--ordererTLSHostnameOverride orderer.example.com \
+--tls --cafile ${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+-C mychannel -n accountcc \
+--peerAddresses localhost:7051 --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+--peerAddresses localhost:9051 --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+-c '{"function":"CreateAccount","Args":["acc001","D001","9876543210","1234","10000","ACTIVE","0","INIT","Initial account"]}'
 
-# Query an account
+
+Query an account:
+
 peer chaincode query -C mychannel -n accountcc \
-  -c '{"function":"ReadAccount","Args":["acc001"]}'
-Cleanup
-To stop and clean up the network:
-bashcd test-network
+-c '{"function":"ReadAccount","Args":["acc001"]}'
+
+🧹 Cleanup
+cd test-network
 ./network.sh down
-Architecture
-Components
 
-Chaincode (Smart Contract) - Written in Go, manages account state on the blockchain
-REST API - Go-based HTTP server that interacts with the chaincode via Fabric Gateway
-Hyperledger Fabric Network - 2 organizations (Org1, Org2), 1 orderer, using Raft consensus
+🏗️ Architecture
 
-Data Flow
+Components:
+
+Chaincode: Go smart contract managing account state
+
+REST API: Go-based HTTP server, connects via Fabric Gateway
+
+Fabric Network: 2 Orgs (Org1, Org2) + 1 Orderer (Raft consensus)
+
+Data Flow:
+
 Client (curl/Postman)
-    ↓
-REST API (Docker Container)
-    ↓
+   ↓
+REST API (Docker)
+   ↓
 Fabric Gateway SDK
-    ↓
+   ↓
 Peer Nodes (Org1, Org2)
-    ↓
-Chaincode (Smart Contract)
-    ↓
+   ↓
+Chaincode (Go)
+   ↓
 Ledger (World State + Blockchain)
-Features
+
+✨ Features
 
 Account creation with validation
-Secure account updates
-Complete transaction history tracking
-RESTful API for easy integration
-Immutable audit trail via blockchain
-Multi-organization endorsement
 
-Technologies Used
+Secure updates
 
-Hyperledger Fabric 2.5.x
-Go 1.23
-Docker & Docker Compose
-Fabric Contract API (Go)
-Fabric Gateway SDK (Go)
-gRPC for peer communication
+Transaction history tracking
 
-Security Considerations
+RESTful API for integrations
+
+Immutable audit trail
+
+Multi-org endorsement
+
+🔒 Security Considerations
 
 TLS enabled for all communications
+
 Certificate-based authentication
-Multi-organization endorsement policy
-MPIN stored (consider hashing in production)
+
+Multi-org endorsement policies
+
+MPIN stored (hashing recommended in production)
+
 Private keys stored securely in MSP
 
-Future Enhancements
+🚀 Future Enhancements
 
-Add transaction between accounts
-Implement role-based access control
-Add balance validation rules
-Implement event notifications
-Add pagination for history queries
-Enhanced error handling and logging
+Transactions between accounts
 
-License
+Role-based access control
+
+Balance validation rules
+
+Event notifications
+
+Pagination for history queries
+
+Improved error handling & logging
+
+📜 License
+
 This project was created as part of a Hyperledger Fabric internship assignment.
